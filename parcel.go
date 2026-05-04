@@ -24,6 +24,14 @@ func (s ParcelStore) Add(p Parcel) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if rowsAffected == 0 {
+		return 0, sql.ErrNoRows
+	}
+
 	x, err := res.LastInsertId()
 	// верните идентификатор последней добавленной записи
 	return int(x), err
@@ -74,12 +82,19 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 
 func (s ParcelStore) SetStatus(number int, status string) error {
 	// реализуйте обновление статуса в таблице parcel
-	_, err := s.db.Exec("UPDATE parcel SET status = :st WHERE number=:n;",
+	res, err := s.db.Exec("UPDATE parcel SET status = :st WHERE number=:n;",
 		sql.Named("n", number),
 		sql.Named("st", status),
 	)
 	if err != nil {
 		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
 	}
 	return nil
 }
@@ -87,12 +102,19 @@ func (s ParcelStore) SetStatus(number int, status string) error {
 func (s ParcelStore) SetAddress(number int, address string) error {
 	// реализуйте обновление адреса в таблице parcel
 	// менять адрес можно только если значение статуса registered
-	_, err := s.db.Exec("UPDATE parcel SET address = :ad WHERE number=:n AND status='registered';",
+	res, err := s.db.Exec("UPDATE parcel SET address = :ad WHERE number=:n AND status='registered';",
 		sql.Named("n", number),
 		sql.Named("ad", address),
 	)
 	if err != nil {
 		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
 	}
 	return nil
 }
@@ -100,11 +122,18 @@ func (s ParcelStore) SetAddress(number int, address string) error {
 func (s ParcelStore) Delete(number int) error {
 	// реализуйте удаление строки из таблицы parcel
 	// удалять строку можно только если значение статуса registered
-	_, err := s.db.Exec("DELETE FROM parcel WHERE number=:n AND status='registered';",
+	res, err := s.db.Exec("DELETE FROM parcel WHERE number=:n AND status='registered';",
 		sql.Named("n", number),
 	)
 	if err != nil {
 		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
 	}
 	return nil
 }
