@@ -119,6 +119,11 @@ func TestSetStatus(t *testing.T) {
 	assert.Equal(t, newStat, pars.Status)
 
 	err = store.Delete(n)
+	require.Error(t, err)
+	newStat = "registered"
+	err = store.SetStatus(n, newStat)
+	require.NoError(t, err)
+	err = store.Delete(n)
 	require.NoError(t, err)
 
 	pars, err = store.Get(n)
@@ -161,7 +166,7 @@ func TestGetByClient(t *testing.T) {
 	// убедитесь в отсутствии ошибки
 	// убедитесь, что количество полученных посылок совпадает с количеством добавленных
 	require.NoError(t, err)
-	assert.Len(t, storedParcels, len(parcels))
+	assert.Len(t, storedParcels, 3)
 	// check
 	for _, parcel := range storedParcels {
 		// в parcelMap лежат добавленные посылки, ключ - идентификатор посылки, значение - сама посылка
