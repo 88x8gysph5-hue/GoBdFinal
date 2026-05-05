@@ -14,8 +14,7 @@ func NewParcelStore(db *sql.DB) ParcelStore {
 
 func (s ParcelStore) Add(p Parcel) (int, error) {
 	// реализуйте добавление строки в таблицу parcel, используйте данные из переменной p
-	res, err := s.db.Exec("INSERT INTO parcel (number, client, status, address,created_at) VALUES (:n, :cl, :st, :ad,:cr)",
-		sql.Named("n", p.Number),
+	res, err := s.db.Exec("INSERT INTO parcel (client, status, address,created_at) VALUES (:cl, :st, :ad,:cr)",
 		sql.Named("cl", p.Client),
 		sql.Named("st", p.Status),
 		sql.Named("ad", p.Address),
@@ -31,7 +30,6 @@ func (s ParcelStore) Add(p Parcel) (int, error) {
 	if rowsAffected == 0 {
 		return 0, sql.ErrNoRows
 	}
-
 	x, err := res.LastInsertId()
 	// верните идентификатор последней добавленной записи
 	return int(x), err
