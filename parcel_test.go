@@ -34,6 +34,7 @@ func TestAddGetDelete(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
 	require.NoError(t, err)
+	defer db.Close()
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
 	n, err := store.Add(parcel)
@@ -46,11 +47,8 @@ func TestAddGetDelete(t *testing.T) {
 	// проверьте, что значения всех полей в полученном объекте совпадают со значениями полей в переменной parcel
 	pars, err := store.Get(n)
 	require.NoError(t, err)
-	assert.Equal(t, parcel.Address, pars.Address)
-	assert.Equal(t, parcel.Client, pars.Client)
-	assert.Equal(t, parcel.CreatedAt, pars.CreatedAt)
-	assert.Equal(t, n, pars.Number)
-	assert.Equal(t, parcel.Status, pars.Status)
+	parcel.Number = n
+	assert.Equal(t, parcel, pars)
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
 	// проверьте, что посылку больше нельзя получить из БД
@@ -68,6 +66,7 @@ func TestSetAddress(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
 	require.NoError(t, err)
+	defer db.Close()
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
 	n, err := store.Add(parcel)
@@ -100,6 +99,7 @@ func TestSetStatus(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
 	require.NoError(t, err)
+	defer db.Close()
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
 	n, err := store.Add(parcel)
@@ -136,6 +136,7 @@ func TestGetByClient(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
 	require.NoError(t, err)
+	defer db.Close()
 	store := NewParcelStore(db)
 	parcels := []Parcel{
 		getTestParcel(),
@@ -174,9 +175,6 @@ func TestGetByClient(t *testing.T) {
 		// убедитесь, что значения полей полученных посылок заполнены верно
 		exp, ok := parcelMap[parcel.Number]
 		require.True(t, ok)
-		assert.Equal(t, exp.Address, parcel.Address)
-		assert.Equal(t, exp.CreatedAt, parcel.CreatedAt)
-		assert.Equal(t, exp.Client, parcel.Client)
-		assert.Equal(t, exp.Status, parcel.Status)
+		assert.Equal(t, parcel, exp)
 	}
 }
